@@ -21,6 +21,9 @@ class TicketDB(ezcord.DBHandler):
             )"""
         )
 
+        # Call setup when creating the database instance
+        await self.setup()
+
     async def set_category(self, server_id, category_id):
         await self.execute(
             "INSERT INTO ticket (server_id, category_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET category_id = ?",
@@ -50,6 +53,7 @@ class TicketDB(ezcord.DBHandler):
 
 
 db = TicketDB()
+
 options = [
     discord.SelectOption(label="Support", description="If you need support, please open a ticket", emoji="🎫"),
     discord.SelectOption(label="Report user", description="report a user", emoji="👥"),
