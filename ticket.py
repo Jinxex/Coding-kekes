@@ -21,8 +21,6 @@ class TicketDB(ezcord.DBHandler):
             )"""
         )
 
-        # Call setup when creating the database instance
-        await self.setup()
 
     async def set_category(self, server_id, category_id):
         await self.execute(
