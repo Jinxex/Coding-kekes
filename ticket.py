@@ -7,6 +7,11 @@ import asyncio
 import io
 from discord.ext import commands
 
+options = [
+    discord.SelectOption(label="Add User", description="Add User to ticket", emoji="👥"),
+    discord.SelectOption(label="Remove User", description="Remove a user from ticket", emoji="❌"),
+]
+
 class TicketDB(ezcord.DBHandler):
     def __init__(self):
         super().__init__("db/ticket.db")
@@ -50,16 +55,10 @@ class TicketDB(ezcord.DBHandler):
 
 
 db = TicketDB()
-options = [
-        discord.SelectOption(label="Support", description="If you need support, please open a ticket", emoji="🎫"),
-        discord.SelectOption(label="Report user", description="report a user", emoji="👥"),
-        discord.SelectOption(label="Apply for team", description="Apply for your team ", emoji="💼"),
-    ]
+
 class Ticket(ezcord.Cog, emoji="🎫"):
     def __init__(self, bot):
         self.bot = bot
-
-
 
     @ezcord.Cog.listener()
     async def on_ready(self):
@@ -78,11 +77,11 @@ class Ticket(ezcord.Cog, emoji="🎫"):
                             role: discord.Role):
         server_id = ctx.guild.id
         category_id = category.id
-        teamrole_id = role.id
+        team_role_id = role.id
         logs_channel_id = logs.id
         await db.set_logs_channel(server_id, logs_channel_id)
         await db.set_category(server_id, category_id)
-        await db.set_teamrole(server_id, teamrole_id)
+        await db.set_teamrole(server_id, team_role_id)
 
         embed = discord.Embed(
             title="Create a ticket",
@@ -94,11 +93,8 @@ class Ticket(ezcord.Cog, emoji="🎫"):
         await ctx.respond("It was sent successfully", ephemeral=True)
 
 
-
 def setup(bot):
     bot.add_cog(Ticket(bot))
-
-
 
 
 class CreateTicket(discord.ui.View):
@@ -130,7 +126,7 @@ class CreateTicketSelect(discord.ui.View):
     )
     async def ticket_select_callback(self, select, interaction):
         category_id = await db.get_category(interaction.guild.id)
-        teamrole_id = await db.get_teamrole(interaction.guild.id)
+        team_role_id = await db.get_teamrole(interaction.guild.id)
 
         if category_id:
             category = discord.utils.get(interaction.guild.categories, id=category_id)
@@ -143,7 +139,7 @@ class CreateTicketSelect(discord.ui.View):
                     interaction.guild.me: discord.PermissionOverwrite(view_channel=True, read_message_history=True,
                                                                       send_messages=True),
                 }
-                team_role = interaction.guild.get_role(teamrole_id)
+                team_role = interaction.guild.get_role(team_role_id)
                 if team_role:
                     topic = f"Ticket for {interaction.user.name}. Contact {team_role.mention} for assistance."
                 else:
@@ -167,14 +163,6 @@ class CreateTicketSelect(discord.ui.View):
 
         await interaction.response.send_message(
             "The category ID is not set in the database or the specified category doesn't exist.", ephemeral=True)
-
-
-options = [
-    discord.SelectOption(label="Add User", description="Add User to ticket", emoji="👥"),
-    discord.SelectOption(label="Remove User", description="Remove a user from ticket",
-                         emoji="<:redcross:758380151238033419>"),
-
-]
 
 
 class TicketView(discord.ui.View):
@@ -281,11 +269,11 @@ class TicketView(discord.ui.View):
     )
     async def handle_ticket_actions(self, select, interaction):
         server_id = interaction.guild.id
-        teamrole_id = await db.get_teamrole(server_id)
+        team_role_id = await db.get_teamrole(server_id)
 
         user_roles = [role.id for role in interaction.user.roles]
 
-        if teamrole_id in user_roles:
+        if team_role_id in user_roles:
             selected_options = interaction.data['values']
             channel = interaction.channel
             await interaction.message.edit(view=self)
@@ -327,7 +315,7 @@ class RemoveUserModal(discord.ui.Modal):
                 style=discord.InputTextStyle.short,
                 custom_id="remove_user",
             ),
-            title=" Remove user to Ticket"
+            title="Remove user from Ticket"
         )
 
     async def callback(self, interaction):
@@ -337,5 +325,5 @@ class RemoveUserModal(discord.ui.Modal):
                                                            ephemeral=True)
         overwrite = discord.PermissionOverwrite(view_channel=False, send_messages=False, read_message_history=False)
         await interaction.channel.set_permissions(user, overwrite=overwrite)
-        await interaction.response.send_message(content=f"{user.mention} has been Remove to this ticket!",
+        await interaction.response.send_message(content=f"{user.mention} has been removed from this ticket!",
                                                 ephemeral=True)
