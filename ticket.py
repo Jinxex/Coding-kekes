@@ -54,37 +54,6 @@ class TicketDB(ezcord.DBHandler):
 
 db = TicketDB()
 
-
-    async def set_category(self, server_id, category_id):
-        await self.execute(
-            "INSERT INTO ticket (server_id, category_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET category_id = ?",
-            (server_id, category_id, category_id)
-        )
-
-    async def get_category(self, server_id):
-        return await self.one("SELECT category_id FROM ticket WHERE server_id = ?", (server_id,))
-
-    async def set_teamrole(self, server_id, teamrole_id):
-        await self.execute(
-            "INSERT INTO ticket (server_id, teamrole_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET teamrole_id = ?",
-            (server_id, teamrole_id, teamrole_id)
-        )
-
-    async def get_teamrole(self, server_id):
-        return await self.one("SELECT teamrole_id FROM ticket WHERE server_id = ?", (server_id,))
-
-    async def set_logs_channel(self, server_id, logs_channel_id):
-        await self.execute(
-            "INSERT INTO ticket (server_id, logs_channel_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET logs_channel_id = ?",
-            (server_id, logs_channel_id, logs_channel_id)
-        )
-
-    async def get_logs_channel(self, server_id):
-        return await self.one("SELECT logs_channel_id FROM ticket WHERE server_id = ?", (server_id,))
-
-
-db = TicketDB()
-
 options = [
     discord.SelectOption(label="Support", description="If you need support, please open a ticket", emoji="🎫"),
     discord.SelectOption(label="Report user", description="report a user", emoji="👥"),
