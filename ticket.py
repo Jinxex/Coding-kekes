@@ -12,14 +12,47 @@ class TicketDB(ezcord.DBHandler):
         super().__init__("db/ticket.db")
 
     async def setup(self):
+        try:
+            await self.execute(
+                """CREATE TABLE IF NOT EXISTS ticket(
+                server_id INTEGER PRIMARY KEY,
+                category_id INTEGER DEFAULT 0,
+                teamrole_id INTEGER DEFAULT 0,
+                logs_channel_id INTEGER DEFAULT 0
+                )"""
+            )
+        except Exception as e:
+            print(f"Error setting up database: {e}")
+
+    async def set_category(self, server_id, category_id):
         await self.execute(
-            """CREATE TABLE IF NOT EXISTS ticket(
-            server_id INTEGER PRIMARY KEY,
-            category_id INTEGER DEFAULT 0,
-            teamrole_id INTEGER DEFAULT 0,
-            logs_channel_id INTEGER DEFAULT 0
-            )"""
+            "INSERT INTO ticket (server_id, category_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET category_id = ?",
+            (server_id, category_id, category_id)
         )
+
+    async def get_category(self, server_id):
+        return await self.one("SELECT category_id FROM ticket WHERE server_id = ?", (server_id,))
+
+    async def set_teamrole(self, server_id, teamrole_id):
+        await self.execute(
+            "INSERT INTO ticket (server_id, teamrole_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET teamrole_id = ?",
+            (server_id, teamrole_id, teamrole_id)
+        )
+
+    async def get_teamrole(self, server_id):
+        return await self.one("SELECT teamrole_id FROM ticket WHERE server_id = ?", (server_id,))
+
+    async def set_logs_channel(self, server_id, logs_channel_id):
+        await self.execute(
+            "INSERT INTO ticket (server_id, logs_channel_id) VALUES (?, ?) ON CONFLICT(server_id) DO UPDATE SET logs_channel_id = ?",
+            (server_id, logs_channel_id, logs_channel_id)
+        )
+
+    async def get_logs_channel(self, server_id):
+        return await self.one("SELECT logs_channel_id FROM ticket WHERE server_id = ?", (server_id,))
+
+
+db = TicketDB()
 
 
     async def set_category(self, server_id, category_id):
