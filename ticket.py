@@ -97,6 +97,7 @@ class Ticket(ezcord.Cog, emoji="🎫"):
         )
         embed.timestamp = datetime.utcnow()
         await ctx.send(embed=embed, view=CreateTicket())
+        await ctx.defer(ephemeral=True)
         await ctx.respond("The setup was completed successfully", ephemeral=True)
 
 def setup(bot):
