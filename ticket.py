@@ -73,7 +73,7 @@ class Ticket(ezcord.Cog, emoji="🎫"):
     ticket = SlashCommandGroup("ticket", default_member_permissions=discord.Permissions(administrator=True))
 
     @ticket.command(name="setup", description="Create a ticket")
-    @commands.guild_only()
+    @discord.guild_only()
     @option("category", description="Select a category", type=discord.CategoryChannel)
     @option("role", description="Select a role", type=discord.Role)
     @option("logs", description="Select a logs Channel", type=discord.TextChannel)
@@ -83,10 +83,13 @@ class Ticket(ezcord.Cog, emoji="🎫"):
         category_id = category.id
         teamrole_id = role.id
         logs_channel_id = logs.id
+
+        # Save settings to the database
         await db.set_logs_channel(server_id, logs_channel_id)
         await db.set_category(server_id, category_id)
         await db.set_teamrole(server_id, teamrole_id)
 
+        # Create and send the embed
         embed = discord.Embed(
             title="Create a ticket",
             description="**If you need support, click `📨 Create ticket` button below and create a ticket!**",
@@ -94,7 +97,7 @@ class Ticket(ezcord.Cog, emoji="🎫"):
         )
         embed.timestamp = datetime.utcnow()
         await ctx.send(embed=embed, view=CreateTicket())
-        await ctx.response.send_message("It was sent successfully", ephemeral=True)
+        await ctx.respond("The setup was completed successfully", ephemeral=True)
 
 def setup(bot):
     bot.add_cog(Ticket(bot))
